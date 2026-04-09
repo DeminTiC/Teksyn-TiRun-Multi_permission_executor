@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 一个带窗口界面的权限提升小工具，可以用 **TrustedInstaller**、**SYSTEM** 或 **当前用户** 身份在新窗口里跑命令或程序
+可以试试用选定的权限启动一个 CMD 窗口，然后输入 whoami /groups 看看权限池多大
 
 > 用 TrustedInstaller 权限的时候悠着点，乱删文件或改系统配置可能会把系统搞崩，后果自己担
 
