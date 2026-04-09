@@ -1,132 +1,120 @@
-# Teksyn-Multi_permission_executor
+# Teksyn - 多权限执行器
 
 [![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-blue)](https://github.com/PowerShell/PowerShell)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-一款带图形界面的 Windows 权限提升工具，支持以 **TrustedInstaller**、**SYSTEM** 或 **当前用户** 权限在新窗口中运行任意命令或程序。
+一个带窗口界面的权限提升小工具，可以用 **TrustedInstaller**、**SYSTEM** 或 **当前用户** 身份在新窗口里跑命令或程序。
 
->  **警告**：高权限可能损坏系统或带来安全风险，请在理解权限作用后谨慎使用。建议仅在测试环境或系统维护场景下使用。
+> 用 TrustedInstaller 权限的时候悠着点，乱删文件或改系统配置可能会把系统搞崩，后果自己担。
 
-##  界面预览
+## 界面长这样（差不多吧）
 
 ```
 +--------------------------------------------------------+
-|  Teksyn - 多权限执行器                                 |
-|  权力越大，责任越大，请谨慎操作！                       |
-|                                                        |
-|  要执行的命令（支持参数）：                             |
-|  [ cmd.exe                          ] [浏览...]       |
-|                                                        |
-|  权限级别：[ TrustedInstaller ▼ ]                      |
-|  [安装 NtObjectManager 模块]  [在新窗口中运行命令]      |
-|                                                        |
-|  提示：所有模式均在新窗口运行命令，不捕获输出。          |
-|  TrustedInstaller / SYSTEM 模式需要先安装模块。        |
-|  当前用户模式直接运行，无需模块。                       |
-|                                                        |
-|                          [关于]  [退出]                |
+|  Teksyn · 权限执行器                                   
+|  权力越大，责任越大 · 操作不可逆                    
+|                                                        
+|  要执行的命令（支持参数）：                             
+|  [ cmd.exe                          ] [浏览...]       
+|                                                        
+|  权限级别：[ TrustedInstaller ▼ ]                      
+|  [安装模块]  [在新窗口中运行]                          
+|                                                        
+|  · 所有模式均在新窗口运行，不捕获输出                  
+|  · TrustedInstaller / SYSTEM 需要先装 NtObjectManager  
+|  · 当前用户模式不用模块，直接跑                        
+|                                                        
+|                          [关于]  [退出]                
 +--------------------------------------------------------+
 ```
 
-##  功能特性
+## 这脚本能干啥
 
--  **三种权限级别**  
-  - **TrustedInstaller** – 最高系统权限，可修改受保护的系统文件  
-  - **SYSTEM** – 系统账户权限，与 Windows 内核级服务同级  
-  - **当前用户** – 标准用户权限，无需额外依赖  
+- **三种权限切换**  
+  - **TrustedInstaller**：系统里最高的权限，能改那些受保护的系统文件  
+  - **SYSTEM**：和 Windows 后台服务一个级别  
+  - **当前用户**：就是你当前登录账户的权限，不用装额外东西  
 
--  **图形化界面**  
-  无需记忆命令行参数，输入命令或通过“浏览”选择可执行文件即可运行。
+- **图形界面操作**  
+  不用记命令行，输入命令或者点“浏览”选程序就行。
 
--  **一键安装依赖**  
-  TrustedInstaller / SYSTEM 模式依赖 [`NtObjectManager`](https://www.powershellgallery.com/packages/NtObjectManager) PowerShell 模块，界面内置安装按钮。
+- **点一下装模块**  
+  TrustedInstaller 和 SYSTEM 模式需要 `NtObjectManager` 这个 PowerShell 模块，界面里有个按钮点一下就自动装了（需要联网）。
 
--  **独立新窗口运行**  
-  所有命令均在新控制台窗口中启动，不干扰主界面，输出直接显示在目标窗口中。
+- **单独弹窗口跑命令**  
+  所有命令都在新控制台窗口里跑，主界面不卡，输出就在新窗口里看。
 
--  **安全提示**  
-  界面醒目提醒权限风险，默认禁用需要模块的操作直到模块安装成功。
+- **提示和禁用逻辑**  
+  需要装模块的时候运行按钮是灰的，装完才能点。选当前用户模式就直接能用。
 
-##  使用前提
+## 运行条件
 
-- **操作系统**：Windows 7 / 8 / 10 / 11，Windows Server 2012+  
-- **PowerShell**：5.1 或更高版本  
-- **权限要求**：**必须以管理员身份运行**（当前用户模式虽可独立运行，但为统一体验建议始终以管理员启动）  
-- **.NET Framework**：4.5 或更高（通常 Windows 已自带）
+- **系统**：Windows 7 到 11，Server 2012 及以上都行  
+- **PowerShell**：5.1 或更高（Win10/11 自带就是）  
+- **权限**：**得用管理员身份运行**（就算只用当前用户模式也建议右键管理员启动，省得出奇怪问题）  
+- **.NET**：4.5 以上（系统一般都有）
 
-##  快速开始
+## 怎么用
 
-### 1️⃣ 下载脚本
+1. 从 Release 中下载 **TiRun** 的压缩包，然后解压。
+2. 右键 Stater.bat 选“以管理员身份运行”，等待启动。
+3. 输入你要跑的命令，或者点“浏览”找个 exe/bat。
+4. 下拉选权限：TrustedInstaller / SYSTEM / 当前用户。
+5. 如果选了高权限模式且没装过模块，点“安装模块”，等它装完。
+6. 点“在新窗口中运行”，目标程序就会以你选的权限弹新窗口了。
 
-### 2️⃣ 以管理员身份运行Starter
+## 原理简单说
 
-### 3️⃣ 使用步骤
+- **高权限模式**：通过 `NtObjectManager` 模块拿到 TrustedInstaller.exe 或 winlogon.exe 的令牌，再用 `New-Win32Process` 以这个令牌起个新进程，同时指定 `NewConsole` 让它有独立窗口。  
+- **当前用户模式**：直接用 `Start-Process` 起新窗口，权限跟你当前一样。  
+- **界面**：纯 `System.Windows.Forms` 手搓的，没依赖外部 UI 库。
 
-| 步骤 | 操作 |
-|------|------|
-| 1 | 在文本框中输入要执行的命令（例如 `notepad.exe`、`cmd /k whoami`）或点击“浏览”选择文件。 |
-| 2 | 从下拉框选择需要的权限级别：`TrustedInstaller`、`SYSTEM` 或 `CurrentUser`。 |
-| 3 | 若选择 `TrustedInstaller` 或 `SYSTEM` 且未安装模块，点击“安装 NtObjectManager 模块”。 |
-| 4 | 点击“在新窗口中运行命令”，目标程序将以所选权限在新控制台窗口中启动。 |
+## 依赖（点按钮自动装）
 
-##  工作原理
+| 依赖 | 干嘛的 | 怎么装 |
+|------|--------|--------|
+| `NtObjectManager` | 获取高权限令牌并创建进程 | 点界面按钮自动装（需要联网） |
+| `SeDebugPrivilege` | 调试特权，用来打开高权限进程 | 脚本里 `Enable-NtTokenPrivilege` 自动启用 |
 
-- **TrustedInstaller / SYSTEM 模式**  
-  使用 `NtObjectManager` 模块获取 TrustedInstaller.exe 或 winlogon.exe 的进程令牌，通过 `New-Win32Process` 创建继承该令牌的新进程（带 `NewConsole` 标志）。
+如果网络不行，也可以手动装：  
+`Install-Module -Name NtObjectManager -Force -Scope CurrentUser`
 
-- **当前用户模式**  
-  直接调用 `Start-Process` 以当前会话权限启动新窗口。
+## 常见问题（如果真有什么神秘问题的话，直接联系我吧，下面列的应该够全了）
 
-- **GUI 框架**  
-  基于 `System.Windows.Forms` 原生实现，无需额外安装任何 UI 库。
+**Q：为什么 TrustedInstaller 模式有时候会卡一会儿？**  
+A：TrustedInstaller 服务默认手动启动，脚本会去拉它起来，得等几秒让进程稳定。
 
-##  依赖项（自动处理）
+**Q：SYSTEM 模式干嘛用 winlogon.exe？**  
+A：winlogon 是登录进程，始终 SYSTEM 身份跑，比 lsass 稳，也不会被杀软盯上。
 
-| 依赖 | 用途 | 安装方式 |
-|------|------|----------|
-| [`NtObjectManager`](https://www.powershellgallery.com/packages/NtObjectManager) | 获取 TrustedInstaller / SYSTEM 令牌并创建进程 | 脚本内一键安装（需联网） |
-| `SeDebugPrivilege` | 调试特权，用于打开高权限进程 | 脚本执行 `Enable-NtTokenPrivilege` 自动启用 |
+**Q：点了运行没反应？**  
+- 看看是不是没以管理员身份跑脚本  
+- 杀软可能拦了 `NtObjectManager` 的行为，暂时关了试试  
+- 命令路径有空格的话记得在界面上加引号，比如 `"C:\Program Files\xxx\xxx.exe"`
 
-> 若网络受限，可手动安装模块：  
-> `Install-Module -Name NtObjectManager -Force -Scope CurrentUser`
+**Q：能不能把输出抓回来显示在界面上？**  
+A：这工具设计就是弹新窗口看输出，没做输出捕获。想要日志的话自己在命令里加重定向，比如 `cmd /c my.exe > log.txt`。
 
-##  常见问题
+## 安全相关
 
-### 问：为什么 TrustedInstaller 模式需要启动服务？
-答：TrustedInstaller 服务默认是手动启动，脚本会自动启动它并等待几秒，确保进程存在后再获取令牌。
+- 没后门、没联网上报、没多余动作，代码全公开。  
+- TrustedInstaller 权限能干很多底层操作，**别瞎搞**，尤其是删系统文件或者改注册表。  
+- 作者不对你自己误操作导致的系统挂掉负责。
 
-### 问：SYSTEM 模式为何选用 winlogon.exe？
-答：`winlogon.exe` 是 Windows 登录进程，始终以 SYSTEM 身份运行，且相比 `lsass.exe` 更稳定安全。
+## 许可证
 
-### 问：运行后没有任何窗口弹出？
-答：请检查：
-- 是否以管理员身份运行脚本
-- 防火墙/杀毒软件是否拦截了 `NtObjectManager` 的行为
-- 命令本身是否正确（例如路径包含空格时需加引号）
+就是MIT，随便用，改也行，保留个作者名就行。
 
-### 问：能否捕获命令的输出？
-答：本工具专注于“在新窗口运行”，不捕获输出。如需捕获输出，建议直接使用 `Start-Process -RedirectStandardOutput` 自行编写脚本。
+## 参考/致谢
 
-##  安全声明
+- [NtObjectManager](https://github.com/googleprojectzero/sandbox-attacksurface-analysis-tools)（其实是 google 的 project zero 那套，不过模块在 PSGallery 里）  
+- 写这个主要是提权的时候老要手动敲代码，还要搞什么获取所有权（还有几率失败），干脆整个带GUI界面的脚本多省事。
+- **Nsudo** 也给这个项目带来了很大的启发（Nsudo提权真的很快，比我这个脚本快多了其实，但是脚本的兼容性会更好一点，跨平台啥的会更方便）（不是要对标Nsudo，Nsudo可以以调用方式运行，这个脚本暂时还没做这个，各位按需选择吧）
 
-- 本工具**不包含任何后门、木马或遥测代码**，所有操作均在本地完成。
-- 使用 TrustedInstaller 权限可绕过大部分系统保护，**请勿用于恶意目的**。
-- 建议仅在你完全理解命令后果的情况下使用，作者不对误操作导致的系统损坏负责。
+## 反馈
 
-##  许可证
-
-本项目采用 [MIT 许可证](LICENSE)，你可以自由使用、修改和分发，但需保留版权声明。
-
-##  致谢
-
-- [NtObjectManager](https://github.com/google/gears) 提供了强大的 Windows NT 对象管理能力。
-- 灵感来源于系统维护中对 TrustedInstaller 权限的实际需求。
-
-##  联系与反馈
-
-- 提交 [Issue](https://github.com/your-repo/Teksyn/issues) 报告 Bug 或建议
-- 欢迎 Pull Request 改进代码或文档
+有问题或建议直接提 [Issue] 吧
 
 ---
 
-**⭐ 如果这个工具帮助到了你，请给一个 Star 支持作者！**
+**觉得好用就给个 Star，谢了。**
