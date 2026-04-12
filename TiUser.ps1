@@ -1,7 +1,8 @@
 <#
 .SYNOPSIS
-    多权限执行器（GUI V1.2版）
+    多权限执行器（GUI V1.3版）
     V1.2我尝试修改了GUI界面，并且尝试添加了一些新功能，比如启用所有特权、交互式桌面、启动前暂停等等，可能不太稳定或者无效
+V1.3依旧GUI更新，功能不变
     如果真不行的话我再改吧
 .DESCRIPTION
     支持 TrustedInstaller、SYSTEM、当前用户三种身份启动新窗口运行命令
@@ -254,38 +255,86 @@ function Invoke-WithPrivilege {
     }
 }
 
-# 构建 GUI（V1.2主要更新内容）
+# 构建 GUI
 $form = New-Object System.Windows.Forms.Form
-$form.Text = 'Teksyn · 权限执行器'
-$form.ClientSize = New-Object System.Drawing.Size(580, 280)
+$form.Text = 'Teksyn · 多权限执行器'
+$form.ClientSize = New-Object System.Drawing.Size(750, 320)
 $form.StartPosition = 'CenterScreen'
 $form.FormBorderStyle = 'FixedDialog'
 $form.MaximizeBox = $false
 $form.Font = New-Object System.Drawing.Font('Segoe UI', 9)
-$form.AutoScaleDimensions = New-Object System.Drawing.SizeF(96, 96)
-$form.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Dpi
+$form.BackColor = [System.Drawing.Color]::FromArgb(240, 240, 240)
 
-# ToolTip（把那个大红色提示去掉了）
-$tooltip = New-Object System.Windows.Forms.ToolTip
-$tooltip.AutoPopDelay = 5000
-$tooltip.InitialDelay = 500
+# 左侧说明面板（新加的）
+$lblHelpTitle = New-Object System.Windows.Forms.Label
+$lblHelpTitle.Text = '使用说明'
+$lblHelpTitle.Location = New-Object System.Drawing.Point(12, 12)
+$lblHelpTitle.Size = New-Object System.Drawing.Size(150, 18)
+$lblHelpTitle.Font = New-Object System.Drawing.Font('Segoe UI', 9, [System.Drawing.FontStyle]::Bold)
+$form.Controls.Add($lblHelpTitle)
+
+$txtHelp = New-Object System.Windows.Forms.RichTextBox
+$txtHelp.Location = New-Object System.Drawing.Point(12, 32)
+$txtHelp.Size = New-Object System.Drawing.Size(170, 245)
+$txtHelp.ReadOnly = $true
+$txtHelp.BackColor = [System.Drawing.Color]::WhiteSmoke
+$txtHelp.BorderStyle = 'FixedSingle'
+$txtHelp.Font = New-Object System.Drawing.Font('Segoe UI', 8.5)
+$txtHelp.Text = @"
+【功能】
+以 TrustedInstaller、
+SYSTEM 或当前用户
+身份运行任意命令。
+
+【权限说明】
+· TrustedInstaller：
+  Windows 最高特权，
+  可修改系统核心文件。
+· SYSTEM：
+  系统账户权限，
+  高于管理员。
+· 当前用户：
+  当前登录用户权限。
+
+【依赖模块】
+高权限模式需安装
+NtObjectManager 模块，
+可通过右侧按钮安装。
+
+【注意事项】
+- 必须管理员身份运行
+- 操作不可逆，请谨慎
+- 隐藏窗口选项仅对
+  cmd 类脚本有效
+"@
+$form.Controls.Add($txtHelp)
+
+# 垂直分隔线
+$line = New-Object System.Windows.Forms.Label
+$line.Location = New-Object System.Drawing.Point(195, 12)
+$line.Size = New-Object System.Drawing.Size(2, 265)
+$line.BorderStyle = 'Fixed3D'
+$form.Controls.Add($line)
+
+# 右侧主操作区起始 X 坐标（显式声明为 int）
+[int]$rightX = 210
 
 # 命令输入行
 $lblCmd = New-Object System.Windows.Forms.Label
 $lblCmd.Text = '命令(&C):'
-$lblCmd.Location = New-Object System.Drawing.Point(12, 15)
-$lblCmd.Size = New-Object System.Drawing.Size(50, 23)
+$lblCmd.Location = New-Object System.Drawing.Point($rightX, 15)
+$lblCmd.Size = New-Object System.Drawing.Size(45, 23)
 $form.Controls.Add($lblCmd)
 
 $txtCommand = New-Object System.Windows.Forms.TextBox
-$txtCommand.Location = New-Object System.Drawing.Point(65, 12)
-$txtCommand.Size = New-Object System.Drawing.Size(420, 23)
+$txtCommand.Location = New-Object System.Drawing.Point(($rightX + 48), 12)
+$txtCommand.Size = New-Object System.Drawing.Size(385, 23)
 $txtCommand.Text = 'cmd'
 $form.Controls.Add($txtCommand)
 
 $btnBrowse = New-Object System.Windows.Forms.Button
 $btnBrowse.Text = '浏览...'
-$btnBrowse.Location = New-Object System.Drawing.Point(490, 10)
+$btnBrowse.Location = New-Object System.Drawing.Point(($rightX + 438), 10)
 $btnBrowse.Size = New-Object System.Drawing.Size(75, 25)
 $btnBrowse.FlatStyle = 'System'
 $btnBrowse.Add_Click({
@@ -298,22 +347,22 @@ $btnBrowse.Add_Click({
 })
 $form.Controls.Add($btnBrowse)
 
-# 选择工作目录行（新增）
+# 工作目录行
 $lblWorkDir = New-Object System.Windows.Forms.Label
 $lblWorkDir.Text = '目录(&D):'
-$lblWorkDir.Location = New-Object System.Drawing.Point(12, 45)
-$lblWorkDir.Size = New-Object System.Drawing.Size(50, 23)
+$lblWorkDir.Location = New-Object System.Drawing.Point($rightX, 45)
+$lblWorkDir.Size = New-Object System.Drawing.Size(45, 23)
 $form.Controls.Add($lblWorkDir)
 
 $txtWorkDir = New-Object System.Windows.Forms.TextBox
-$txtWorkDir.Location = New-Object System.Drawing.Point(65, 42)
-$txtWorkDir.Size = New-Object System.Drawing.Size(420, 23)
+$txtWorkDir.Location = New-Object System.Drawing.Point(($rightX + 48), 42)
+$txtWorkDir.Size = New-Object System.Drawing.Size(385, 23)
 $txtWorkDir.Text = [Environment]::GetFolderPath('Desktop')
 $form.Controls.Add($txtWorkDir)
 
 $btnWorkDir = New-Object System.Windows.Forms.Button
 $btnWorkDir.Text = '...'
-$btnWorkDir.Location = New-Object System.Drawing.Point(490, 40)
+$btnWorkDir.Location = New-Object System.Drawing.Point(($rightX + 438), 40)
 $btnWorkDir.Size = New-Object System.Drawing.Size(30, 25)
 $btnWorkDir.FlatStyle = 'System'
 $btnWorkDir.Add_Click({
@@ -329,12 +378,12 @@ $form.Controls.Add($btnWorkDir)
 # 权限选择行
 $lblPriv = New-Object System.Windows.Forms.Label
 $lblPriv.Text = '权限(&P):'
-$lblPriv.Location = New-Object System.Drawing.Point(12, 80)
-$lblPriv.Size = New-Object System.Drawing.Size(50, 23)
+$lblPriv.Location = New-Object System.Drawing.Point($rightX, 80)
+$lblPriv.Size = New-Object System.Drawing.Size(45, 23)
 $form.Controls.Add($lblPriv)
 
 $cboPriv = New-Object System.Windows.Forms.ComboBox
-$cboPriv.Location = New-Object System.Drawing.Point(65, 78)
+$cboPriv.Location = New-Object System.Drawing.Point(($rightX + 48), 78)
 $cboPriv.Size = New-Object System.Drawing.Size(130, 23)
 $cboPriv.DropDownStyle = 'DropDownList'
 $cboPriv.Items.AddRange(@('TrustedInstaller', 'SYSTEM', 'CurrentUser'))
@@ -344,7 +393,7 @@ $form.Controls.Add($cboPriv)
 # 运行按钮
 $btnRun = New-Object System.Windows.Forms.Button
 $btnRun.Text = '运行'
-$btnRun.Location = New-Object System.Drawing.Point(205, 76)
+$btnRun.Location = New-Object System.Drawing.Point(($rightX + 188), 76)
 $btnRun.Size = New-Object System.Drawing.Size(90, 28)
 $btnRun.Enabled = $false
 $btnRun.FlatStyle = 'System'
@@ -379,7 +428,7 @@ $form.Controls.Add($btnRun)
 # 模块安装按钮
 $btnInstall = New-Object System.Windows.Forms.Button
 $btnInstall.Text = '安装模块'
-$btnInstall.Location = New-Object System.Drawing.Point(305, 76)
+$btnInstall.Location = New-Object System.Drawing.Point(($rightX + 288), 76)
 $btnInstall.Size = New-Object System.Drawing.Size(100, 28)
 $btnInstall.FlatStyle = 'System'
 $btnInstall.Add_Click({
@@ -399,32 +448,34 @@ $btnInstall.Add_Click({
 })
 $form.Controls.Add($btnInstall)
 
-# 附加选项分组框（这样看得更清楚）
+# 附加选项分组框
 $grpOptions = New-Object System.Windows.Forms.GroupBox
 $grpOptions.Text = '选项'
-$grpOptions.Location = New-Object System.Drawing.Point(12, 115)
-$grpOptions.Size = New-Object System.Drawing.Size(555, 80)
+$grpOptions.Location = New-Object System.Drawing.Point($rightX, 115)
+$grpOptions.Size = New-Object System.Drawing.Size(520, 80)
 $form.Controls.Add($grpOptions)
 
-# 隐藏窗口复选框
+# ToolTip
+$tooltip = New-Object System.Windows.Forms.ToolTip
+$tooltip.AutoPopDelay = 5000
+$tooltip.InitialDelay = 500
+
 $chkHideWindow = New-Object System.Windows.Forms.CheckBox
 $chkHideWindow.Text = '隐藏窗口(&H)'
 $chkHideWindow.Location = New-Object System.Drawing.Point(12, 20)
-$chkHideWindow.Size = New-Object System.Drawing.Size(100, 24)
+$chkHideWindow.Size = New-Object System.Drawing.Size(110, 24)
 $chkHideWindow.Checked = $false
-$tooltip.SetToolTip($chkHideWindow, '以隐藏窗口方式启动（对 SYSTEM/TI 有效），即 “/c” 与 “/k” 运行参数切换（仅对脚本类执行文件生效）')
+$tooltip.SetToolTip($chkHideWindow, '以隐藏窗口方式启动（对 SYSTEM/TI 有效），即 “/c” 与 “/k” 运行参数切换')
 $grpOptions.Controls.Add($chkHideWindow)
 
-# 启用全部特权复选框
 $chkAllPrivileges = New-Object System.Windows.Forms.CheckBox
 $chkAllPrivileges.Text = '启用全部特权(&A)'
 $chkAllPrivileges.Location = New-Object System.Drawing.Point(130, 20)
-$chkAllPrivileges.Size = New-Object System.Drawing.Size(130, 24)
+$chkAllPrivileges.Size = New-Object System.Drawing.Size(140, 24)
 $chkAllPrivileges.Checked = $false
 $tooltip.SetToolTip($chkAllPrivileges, '尝试为进程启用所有可用特权（需高权限）')
 $grpOptions.Controls.Add($chkAllPrivileges)
 
-# 交互式桌面复选框
 $chkInteractiveDesktop = New-Object System.Windows.Forms.CheckBox
 $chkInteractiveDesktop.Text = '交互式桌面(&I)'
 $chkInteractiveDesktop.Location = New-Object System.Drawing.Point(280, 20)
@@ -433,7 +484,6 @@ $chkInteractiveDesktop.Checked = $true
 $tooltip.SetToolTip($chkInteractiveDesktop, '在 WinSta0\Default 桌面启动（正常情况不要取消勾选）')
 $grpOptions.Controls.Add($chkInteractiveDesktop)
 
-# 启动前暂停复选框
 $chkPauseBefore = New-Object System.Windows.Forms.CheckBox
 $chkPauseBefore.Text = '启动前暂停(&P)'
 $chkPauseBefore.Location = New-Object System.Drawing.Point(12, 45)
@@ -442,22 +492,21 @@ $chkPauseBefore.Checked = $false
 $tooltip.SetToolTip($chkPauseBefore, '创建进程前暂停 3 秒，便于附加调试器或取消')
 $grpOptions.Controls.Add($chkPauseBefore)
 
-# 底部按钮栏
+# 底部按钮
 $btnAbout = New-Object System.Windows.Forms.Button
 $btnAbout.Text = '关于(&A)'
 $btnAbout.Size = New-Object System.Drawing.Size(80, 26)
-$btnAbout.Location = New-Object System.Drawing.Point(400, 210)
+$btnAbout.Location = New-Object System.Drawing.Point(($rightX + 350), 250)
 $btnAbout.FlatStyle = 'System'
 $btnAbout.Add_Click({
     $about = @"
 Teksyn 多权限执行器
-版本 1.2 · 作者 ATRI-TOPiC
-更新内容请看脚本开头自述
+版本 1.3 · 作者 ATRI-TOPiC
 
 支持 TI / SYSTEM / 当前用户身份执行命令
 依赖 NtObjectManager 模块
 
-权力越大，责任越大，请合理使用，风险自负
+权力越大，责任越大，请合理使用
 "@
     [System.Windows.Forms.MessageBox]::Show($about, '关于', 'OK', 'Information')
 })
@@ -466,7 +515,7 @@ $form.Controls.Add($btnAbout)
 $btnExit = New-Object System.Windows.Forms.Button
 $btnExit.Text = '退出(&X)'
 $btnExit.Size = New-Object System.Drawing.Size(80, 26)
-$btnExit.Location = New-Object System.Drawing.Point(487, 210)
+$btnExit.Location = New-Object System.Drawing.Point(($rightX + 438), 250)
 $btnExit.FlatStyle = 'System'
 $btnExit.Add_Click({ $form.Close() })
 $form.Controls.Add($btnExit)
@@ -477,7 +526,7 @@ $statusBar.Text = '就绪'
 $statusBar.SizingGrip = $false
 $form.Controls.Add($statusBar)
 
-# UI 状态更新（这样就更好看了）
+# UI 状态更新函数
 function UpdateUI {
     $priv = $cboPriv.SelectedItem.ToString()
     if ($priv -eq 'CurrentUser') {
